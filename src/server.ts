@@ -1,16 +1,25 @@
-import express from 'express';
-import morgan from "morgan";
-const app = express();
-const PORT = process.env.PORT || 3000;
+import dotenv from "dotenv";
+import fs from "fs";
+import app from "./app";
 
-app.use(morgan('tiny'));
+// Load base environment variables
+dotenv.config({ path: ".env" });
 
-app.get('/', (req, res) => {
-  res.send('Hello from Express + TypeScript server 🚀');
-});
+// Load environment-specific variables if applicable
+const environment = process.env.environment?.trim() || "";
+const envFilePath = `.env.${environment}`;
 
+if (environment && fs.existsSync(envFilePath)) {
+  dotenv.config({ path: envFilePath });
+  console.log(`Loaded environment variables from ${envFilePath}`);
+} else {
+  console.warn(`Environment-specific .env file not found: ${envFilePath}`);
+}
 
+// Fetch PORT safely
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+// Start server
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
